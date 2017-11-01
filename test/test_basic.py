@@ -1,8 +1,13 @@
-from BotConstructor import BotConstructor
-from Blueprint import Blueprint
+from os import sys,environ
+
+sys.path.append("..")
+
+from alfredbot.BotConstructor import BotConstructor
+from alfredbot.Blueprint import Blueprint
+
 
 #first, we must define the token of the bot
-token = ""
+token = environ.get("BOT_ALFRED_TOKEN")
 
 #then, we can create the BotConstructor object
 bot = BotConstructor(token)

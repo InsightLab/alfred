@@ -1,5 +1,5 @@
-from Blueprint import Blueprint
-from Exceptions.Exceptions import *
+from .Blueprint import Blueprint
+from .exception.Exceptions import *
 import telegram
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 

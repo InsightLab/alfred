@@ -1,4 +1,4 @@
-from Exceptions.Exceptions import *
+from .exception.Exceptions import *
 
 class Blueprint():
 	def __init__(self):
