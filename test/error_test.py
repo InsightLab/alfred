@@ -15,8 +15,6 @@ bot = BotConstructor(token)
 def start(bot,update):
 	update.message.reply_text("The value of 1/0 is: {}".format(1/0))
 
-def error(bot,update,error):
-	print("Error: {}".format(error))
 
 bot.add_command_handler("start",start)
 
