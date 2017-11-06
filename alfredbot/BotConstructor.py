@@ -10,10 +10,31 @@ class BotConstructor():
 		self.updater = Updater(token)
 		self.dp = self.updater.dispatcher
 
+	def __generate_handler(self,function,error=False):
+		
+		if error:
+			def error_handler(bot,update,error):
+				try:
+					return function(bot,update,error)
+				except Exception as e:
+					raise e
+
+			return error_handler
+
+		else:
+			def handler(bot,update):
+				try:
+					return function(bot,update)
+				except Exception as e:
+					print("An error has occured on the execution of {}:\n{}".format(function,e))
+
+			return handler
+
 	def add_command_handler(self,command,command_handler):
 		if(callable(command_handler)):
 			if isinstance(command, str):
-				self.dp.add_handler(CommandHandler(command,command_handler))
+				handler = self.__generate_handler(command_handler)
+				self.dp.add_handler(CommandHandler(command,handler))
 			else:
 				raise NotAString("{} isn't a valid command name. Command names must be string")
 		else:
@@ -25,9 +46,9 @@ class BotConstructor():
 			for entry_point in conversation.get_entry_points():
 				handler = None
 				if entry_point[0]:
-					handler = CommandHandler(entry_point[0],entry_point[1])
+					handler = CommandHandler(entry_point[0],self.__generate_handler(entry_point[1]))
 				else:
-					handler = MessageHandler(entry_point[2],entry_point[1])
+					handler = MessageHandler(entry_point[2],self.__generate_handler(entry_point[1]))
 				entry_points.append(handler)
 
 			states = {}
@@ -38,17 +59,17 @@ class BotConstructor():
 
 				for command in states_commands[state]:
 					if command[0]:
-						states[state].append(CommandHandler(command[0],command[1]))
+						states[state].append(CommandHandler(command[0],self.__generate_handler(command[1])))
 					else:
-						states[state].append(MessageHandler(command[2],command[1]))
+						states[state].append(MessageHandler(command[2],self.__generate_handler(command[1])))
 
 			fallbacks = []
 			for fallback in conversation.get_fallbacks():
 				handler = None
 				if fallback[0]:
-					handler = CommandHandler(fallback[0],fallback[1])
+					handler = CommandHandler(fallback[0],self.__generate_handler(fallback[1]))
 				else:
-					handler = MessageHandler(fallback[2],fallback[1])
+					handler = MessageHandler(fallback[2],self.__generate_handler(fallback[1]))
 				fallbacks.append(handler)
 
 			self.dp.add_handler(ConversationHandler(
@@ -62,13 +83,15 @@ class BotConstructor():
 
 	def set_error_handler(self,error_handler):
 		if(callable(error_handler)):
-			self.dp.add_error_handler(error_handler)
+			handler = self.__generate_handler(error_handler,error=True)
+			self.dp.add_error_handler(handler)
 		else:
 			raise NotCallableException("{} is not a function".format(error_handler))
 
 	def set_message_handler(self,message_handler,message_filter=Filters.text):
 		if(callable(message_handler)):
-			self.dp.add_handler(MessageHandler(message_filter,message_handler))
+			handler = self.__generate_handler(message_handler)
+			self.dp.add_handler(MessageHandler(message_filter,handler))
 		else:
 			raise NotCallableException("{} is not a function".format(message_handler))
 

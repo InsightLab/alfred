@@ -4,8 +4,6 @@ sys.path.append("..")
 
 from alfredbot.BotConstructor import BotConstructor
 from alfredbot.Blueprint import Blueprint
-from alfredbot.Conversation import Conversation
-
 
 #first, we must define the token of the bot
 token = environ.get("BOT_ALFRED_TOKEN")
