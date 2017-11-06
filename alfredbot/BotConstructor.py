@@ -109,7 +109,7 @@ class BotConstructor():
 			if(blueprint.get_message_handler()!=None):
 				self.set_message_handler(blueprint.get_message_handler(),blueprint.get_message_filter())
 		else:
-			raise NotABlueprint("Must pass Blueprint object, not {}".format(type(blueprint)))
+			raise NotABlueprintException("Must pass Blueprint object, not {}".format(type(blueprint)))
 
 	def start(self):
 		print("Starting bot updater...")
