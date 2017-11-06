@@ -16,3 +16,6 @@ class NotABlueprintException(BaseException):
 
 class NotABlueprint(BaseException):
 	pass
+
+class NotAConversation(BaseException):
+	pass

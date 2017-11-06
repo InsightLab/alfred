@@ -1,4 +1,5 @@
 from .exception.Exceptions import *
+from .Conversation import Conversation
 from telegram.ext import Filters
 class Blueprint():
 	def __init__(self):
@@ -6,6 +7,7 @@ class Blueprint():
 		self.error_handler = None
 		self.message_handler = None
 		self.message_filter = None
+		self.conversations = []
 	
 	def add_command_handler(self,command,command_handler):
 		if(callable(command_handler)):
@@ -46,3 +48,12 @@ class Blueprint():
 
 	def get_message_filter(self):
 		return self.message_filter
+
+	def add_conversation(self,conversation):
+		if isinstance(conversation,Conversation):
+			self.conversations.append(conversation)
+		else:
+			raise NotAConversation("Must pass Conversation object, not {}".format(type(conversation)))
+
+	def get_conversations(self):
+		return self.conversations
