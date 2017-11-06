@@ -2,6 +2,8 @@ from os import sys,environ
 
 sys.path.append("..")
 
+from telegram.ext import Filters
+
 from alfredbot.BotConstructor import BotConstructor
 from alfredbot.Blueprint import Blueprint
 
@@ -38,7 +40,7 @@ def error(bot,update,error):
 
 #now, we set this handlers on the blueprint
 blueprint.add_command_handler("ping",ping)
-blueprint.set_message_handler(msg)
+blueprint.set_message_handler(msg,message_filter=Filters.all)
 blueprint.set_error_handler(error)
 
 #and add the blueprint to the BotConstructor

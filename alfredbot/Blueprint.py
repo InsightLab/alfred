@@ -1,10 +1,11 @@
 from .exception.Exceptions import *
-
+from telegram.ext import Filters
 class Blueprint():
 	def __init__(self):
 		self.command_handlers = {}
 		self.error_handler = None
 		self.message_handler = None
+		self.message_filter = None
 	
 	def add_command_handler(self,command,command_handler):
 		if(callable(command_handler)):
@@ -33,11 +34,15 @@ class Blueprint():
 	def get_error_handler(self):
 		return self.error_handler
 
-	def set_message_handler(self,message_handler):
+	def set_message_handler(self,message_handler,message_filter=Filters.text):
 		if(callable(message_handler)):
 			self.message_handler = message_handler
+			self.message_filter = message_filter
 		else:
 			raise NotCallableException("{} is not callable".format(type(message_handler)))
 
 	def get_message_handler(self):
 		return self.message_handler
+
+	def get_message_filter(self):
+		return self.message_filter

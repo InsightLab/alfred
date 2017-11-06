@@ -24,9 +24,9 @@ class BotConstructor():
 		else:
 			raise NotCallableException("{} is not a function".format(error_handler))
 
-	def set_message_handler(self,message_handler):
+	def set_message_handler(self,message_handler,message_filter=Filters.text):
 		if(callable(message_handler)):
-			self.dp.add_handler(MessageHandler(Filters.text,message_handler))
+			self.dp.add_handler(MessageHandler(message_filter,message_handler))
 		else:
 			raise NotCallableException("{} is not a function".format(message_handler))
 
@@ -39,7 +39,7 @@ class BotConstructor():
 				self.set_error_handler(blueprint.get_error_handler())	
 			
 			if(blueprint.get_message_handler()!=None):
-				self.set_message_handler(blueprint.get_message_handler())
+				self.set_message_handler(blueprint.get_message_handler(),blueprint.get_message_filter())
 		else:
 			raise NotABlueprint("Must pass Blueprint object, not {}".format(type(blueprint)))
 
