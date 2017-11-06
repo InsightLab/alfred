@@ -2,7 +2,7 @@ from os import sys,environ
 
 sys.path.append("..")
 
-from telegram.ext import Filters, ConversationHandler
+from telegram.ext import Filters
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
 
 from alfredbot.BotConstructor import BotConstructor
@@ -110,7 +110,7 @@ def bio(bot, update):
 	update.message.reply_text('Thank you! I hope we can talk again some day.')
 
 	#and now the conversation ends
-	return ConversationHandler.END
+	return Conversation.END
 
 
 def cancel(bot, update):
@@ -120,7 +120,7 @@ def cancel(bot, update):
 	update.message.reply_text('Bye! I hope we can talk again some day.',
 							  reply_markup=ReplyKeyboardRemove())
 
-	return ConversationHandler.END
+	return Conversation.END
 
 #we can create a Conversation object to organize this conversation flow
 conversation = Conversation()
