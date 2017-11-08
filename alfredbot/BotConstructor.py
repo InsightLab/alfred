@@ -11,7 +11,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, ConversationHa
 
 class BotConstructor():
 
-	def __init__(self,token):
+	def __init__(self,token=None,bot=None):
 		"""
 		Constructor of the class
 
@@ -20,8 +20,17 @@ class BotConstructor():
 
 		token: String
 			Token generated from @BotFather on telegram
+		bot: python-telegram-bot instance
+			If you already have an instance of a bot, you can send it
 		"""
-		self.updater = Updater(token)
+		if not bot:
+			if token:
+				self.updater = Updater(token)
+			else:
+				raise BotNotDefined("You must send a token or a bot instance")
+		else:
+			self.updater = Updater(bot=bot)
+
 		self.dp = self.updater.dispatcher
 
 	def __generate_handler(self,function,error=False):

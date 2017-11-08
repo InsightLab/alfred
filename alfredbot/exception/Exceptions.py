@@ -23,3 +23,7 @@ class NotABlueprintException(BaseException):
 #exception used when a non Conversation object is passed
 class NotAConversation(BaseException):
 	pass
+
+#exception used when a bot is not especified by the user
+class BotNotDefined(BaseException):
+	pass
