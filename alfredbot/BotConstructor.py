@@ -207,10 +207,31 @@ class BotConstructor():
 		else:
 			raise NotABlueprintException("Must pass Blueprint object, not {}".format(type(blueprint)))
 
-	def start(self):
+	def start(self,idle=False):
 		"""
 		Starts the service
+		
+		Parameters
+		----------
+
+		idle: Boolean
+			put the program to idle (default is False)
+
 		"""
 		print("Starting bot updater...")
 		self.updater.start_polling()
+		
+		if idle:
+			self.idle()
+
+	def idle(self):
+		"""
+		Put the program on iddle state
+		"""
 		self.updater.idle()
+
+	def stop(self):
+		"""
+		Stops the service
+		"""
+
