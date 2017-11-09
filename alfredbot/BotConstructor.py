@@ -7,22 +7,28 @@ from .Blueprint import Blueprint
 from .Conversation import Conversation
 from .exception.Exceptions import *
 import telegram
+import logging
 from telegram.ext import Updater, CommandHandler, MessageHandler, ConversationHandler, Filters
 
 class BotConstructor():
 
-	def __init__(self,token=None,bot=None):
+	def __init__(self,token=None,bot=None,show_log=True):
 		"""
 		Constructor of the class
 
 		Parameters
 		----------
 
-		token: String
+		token : String
 			Token generated from @BotFather on telegram
-		bot: python-telegram-bot instance
+		bot : python-telegram-bot instance
 			If you already have an instance of a bot, you can send it
+		show_log : Boolean
+			By default, the log of the bot will be displayed
 		"""
+		if show_log:			
+			logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 		if not bot:
 			if token:
 				self.updater = Updater(token)
@@ -32,44 +38,6 @@ class BotConstructor():
 			self.updater = Updater(bot=bot)
 
 		self.dp = self.updater.dispatcher
-
-	def __generate_handler(self,function,error=False):
-		"""
-		Function to encapsulate a handler function in order
-		to caught the exceptions that may occurs, since the
-		python-telegram-bot doesn't raise them.
-
-		Parameters
-		----------
-
-		function : Callable
-				Function that will be encapsulated
-		error : Boolean
-				True when encapsulating the error handler
-
-		Returns
-		-------
-
-		handler : Callable
-				Function encapsulated.
-		"""
-		if error:
-			def error_handler(bot,update,error):
-				try:
-					return function(bot,update,error)
-				except Exception as e:
-					raise e
-
-			return error_handler
-
-		else:
-			def handler(bot,update):
-				try:
-					return function(bot,update)
-				except Exception as e:
-					print("An error has occured on the execution of {}:\n{}".format(function,e))
-
-			return handler
 
 	def add_command_handler(self,command,command_handler):
 		"""
@@ -87,8 +55,7 @@ class BotConstructor():
 		"""
 		if(callable(command_handler)):
 			if isinstance(command, str):
-				handler = self.__generate_handler(command_handler)
-				self.dp.add_handler(CommandHandler(command,handler))
+				self.dp.add_handler(CommandHandler(command,command_handler))
 			else:
 				raise NotAString("{} isn't a valid command name. Command names must be string")
 		else:
@@ -109,9 +76,9 @@ class BotConstructor():
 			for entry_point in conversation.get_entry_points():
 				handler = None
 				if entry_point[0]:
-					handler = CommandHandler(entry_point[0],self.__generate_handler(entry_point[1]))
+					handler = CommandHandler(entry_point[0],entry_point[1])
 				else:
-					handler = MessageHandler(entry_point[2],self.__generate_handler(entry_point[1]))
+					handler = MessageHandler(entry_point[2],entry_point[1])
 				entry_points.append(handler)
 
 			states = {}
@@ -122,17 +89,17 @@ class BotConstructor():
 
 				for command in states_commands[state]:
 					if command[0]:
-						states[state].append(CommandHandler(command[0],self.__generate_handler(command[1])))
+						states[state].append(CommandHandler(command[0],command[1]))
 					else:
-						states[state].append(MessageHandler(command[2],self.__generate_handler(command[1])))
+						states[state].append(MessageHandler(command[2],command[1]))
 
 			fallbacks = []
 			for fallback in conversation.get_fallbacks():
 				handler = None
 				if fallback[0]:
-					handler = CommandHandler(fallback[0],self.__generate_handler(fallback[1]))
+					handler = CommandHandler(fallback[0],fallback[1])
 				else:
-					handler = MessageHandler(fallback[2],self.__generate_handler(fallback[1]))
+					handler = MessageHandler(fallback[2],fallback[1])
 				fallbacks.append(handler)
 
 			self.dp.add_handler(ConversationHandler(
@@ -155,8 +122,7 @@ class BotConstructor():
 			Function that will handle the error event
 		"""
 		if(callable(error_handler)):
-			handler = self.__generate_handler(error_handler,error=True)
-			self.dp.add_error_handler(handler)
+			self.dp.add_error_handler(error_handler)
 		else:
 			raise NotCallableException("{} is not a function".format(error_handler))
 
@@ -176,8 +142,7 @@ class BotConstructor():
 			The default is text.
 		"""
 		if(callable(message_handler)):
-			handler = self.__generate_handler(message_handler)
-			self.dp.add_handler(MessageHandler(message_filter,handler))
+			self.dp.add_handler(MessageHandler(message_filter,message_handler))
 		else:
 			raise NotCallableException("{} is not a function".format(message_handler))
 
@@ -207,23 +172,13 @@ class BotConstructor():
 		else:
 			raise NotABlueprintException("Must pass Blueprint object, not {}".format(type(blueprint)))
 
-	def start(self,idle=False):
+	def start(self):
 		"""
 		Starts the service
-		
-		Parameters
-		----------
-
-		idle: Boolean
-			put the program to idle (default is False)
-
 		"""
 		print("Starting bot updater...")
-		self.updater.start_polling()
+		return self.updater.start_polling()
 		
-		if idle:
-			self.idle()
-
 	def idle(self):
 		"""
 		Put the program on iddle state
@@ -234,4 +189,6 @@ class BotConstructor():
 		"""
 		Stops the service
 		"""
+		print("Stopping bot updater...")
+		self.updater.stop()
 
