@@ -4,7 +4,6 @@ sys.path.append("..")
 
 from telegram.ext import Filters
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
-
 from alfredbot.BotConstructor import BotConstructor
 from alfredbot.Blueprint import Blueprint
 from alfredbot.Conversation import Conversation
@@ -30,7 +29,7 @@ blueprint = Blueprint()
 def start(bot, update):
 	print("Starting conversation")
 	#this is a set of possible answers
-	reply_keyboard = [['Boy', 'Girl', 'Other']]
+	reply_keyboard = [['Boy', 'Girl']]
 
 	#the reply_markup hides the keyborad and replace for the set of options defined
 	update.message.reply_text(
@@ -127,22 +126,22 @@ conversation = Conversation()
 
 #we must add a entry point, that represents the first command/message to start the conversation flow
 #OBS: we can have multiple entry points
-conversation.add_command_entry_point("start",start)
+conversation.add_command_entry_point("start", start)
 
 #for each state, we will define the possible command/messages that can be received
-conversation.add_message_to_state("GENDER",gender)
+conversation.add_message_to_state("GENDER", gender)
 
-conversation.add_message_to_state("PHOTO",photo,message_filter=Filters.photo)
-conversation.add_command_to_state("PHOTO","skip",skip_photo)
+conversation.add_message_to_state("PHOTO", photo, message_filter=Filters.photo)
+conversation.add_command_to_state("PHOTO", "skip", skip_photo)
 
-conversation.add_message_to_state("LOCATION",location,message_filter=Filters.location)
-conversation.add_command_to_state("LOCATION","skip",skip_location)
+conversation.add_message_to_state("LOCATION", location, message_filter=Filters.location)
+conversation.add_command_to_state("LOCATION", "skip", skip_location)
 
-conversation.add_message_to_state("BIO",bio)
+conversation.add_message_to_state("BIO", bio)
 
 #all the functions to stop the conversations are added as a fallback
 #OBS: we can have multiple fallbacks
-conversation.add_command_to_fallback("cancel",cancel)
+conversation.add_command_to_fallback("cancel", cancel)
 
 #now we add the conversation to the blueprint
 blueprint.add_conversation(conversation)

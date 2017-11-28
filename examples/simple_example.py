@@ -17,7 +17,7 @@ def start(bot,update):
 	update.message.reply_text("Bot started")
 
 #then, we can add this function as a handler to the command "start"
-bot.add_command_handler("start",start)
+bot.add_command_handler("start", start)
 
 #we can also create a blueprint object, that will contains the organization of the handlers
 blueprint = Blueprint()
@@ -35,7 +35,7 @@ def error(bot,update,error):
 	print(error)
 
 #now, we set this handlers on the blueprint
-blueprint.add_command_handler("ping",ping)
+blueprint.add_command_handler("ping", ping)
 blueprint.add_message_handler(msg)
 blueprint.set_error_handler(error)
 
@@ -43,4 +43,4 @@ blueprint.set_error_handler(error)
 bot.add_blueprint(blueprint)
 
 #now, we just need to start the pool
-bot.start(idle=True)
+bot.start()

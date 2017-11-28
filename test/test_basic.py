@@ -4,13 +4,12 @@ sys.path.append("..")
 import unittest
 from telegram.utils.request import Request
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
-
 from ptbtest import ChatGenerator, MessageGenerator, Mockbot, UserGenerator
-
 from alfredbot.BotConstructor import BotConstructor
 from alfredbot.Blueprint import Blueprint
 
 class SimpleTest(unittest.TestCase):
+	
 	def setUp(self):
 		# For use within the tests we nee some stuff. Starting with a Mockbot
 		self.bot = Mockbot()
@@ -25,7 +24,7 @@ class SimpleTest(unittest.TestCase):
 		def start(bot,update):
 			self.start_value = True
 
-		self.constructor.add_command_handler("start",start)
+		self.constructor.add_command_handler("start", start)
 
 		blueprint = Blueprint()
 
@@ -35,10 +34,11 @@ class SimpleTest(unittest.TestCase):
 		def msg(bot,update):
 			self.message_value = update.message.text
 
-		blueprint.add_command_handler("ping",ping)
+		blueprint.add_command_handler("ping", ping)
 		blueprint.add_message_handler(msg)
 
 		self.constructor.add_blueprint(blueprint)
+
 
 	def test_start(self):
 		self.constructor.start()
@@ -49,6 +49,7 @@ class SimpleTest(unittest.TestCase):
 
 		self.constructor.stop()
 
+
 	def test_ping(self):
 		self.constructor.start()
 		update = self.mg.get_message(text="/ping")
@@ -57,6 +58,7 @@ class SimpleTest(unittest.TestCase):
 		self.assertEqual(self.ping_value, True)
 
 		self.constructor.stop()
+
 
 	def test_message(self):
 		self.constructor.start()
