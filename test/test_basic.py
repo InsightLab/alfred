@@ -5,8 +5,8 @@ import unittest
 from telegram.utils.request import Request
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 from ptbtest import ChatGenerator, MessageGenerator, Mockbot, UserGenerator
-from alfredbot.BotConstructor import BotConstructor
-from alfredbot.Blueprint import Blueprint
+from BotMother.BotConstructor import BotConstructor
+from BotMother.Blueprint import Blueprint
 
 class SimpleTest(unittest.TestCase):
 	

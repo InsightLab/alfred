@@ -4,9 +4,9 @@ sys.path.append("..")
 
 from telegram.ext import Filters
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
-from alfredbot.BotConstructor import BotConstructor
-from alfredbot.Blueprint import Blueprint
-from alfredbot.Conversation import Conversation
+from BotMother.BotConstructor import BotConstructor
+from BotMother.Blueprint import Blueprint
+from BotMother.Conversation import Conversation
 
 """
 This test shows how to construct a conversation with the bot.

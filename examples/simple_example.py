@@ -1,8 +1,8 @@
 from os import sys,environ
 sys.path.append("..")
 
-from alfredbot.BotConstructor import BotConstructor
-from alfredbot.Blueprint import Blueprint
+from BotMother.BotConstructor import BotConstructor
+from BotMother.Blueprint import Blueprint
 
 #first, we must define the token of the bot
 token = environ.get("BOT_ALFRED_TOKEN")
