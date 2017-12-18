@@ -1,12 +1,15 @@
-from alfredbot.models.User import User
-from alfredbot.controllers.User import UserController
-u = User()
-u.id = 1
-u.first_name = "Joana"
-u.username = "joaninha"
+from BotMother.BotConstructor import BotConstructor
 
-u.save()
+from alfredbot.blueprints.users_blueprint import users_blueprint
 
-controller = UserController()
+from os import environ
 
-print(User().get_all())
+token = environ.get("BOT_ALFRED_TOKEN")
+
+bot = BotConstructor(token=token)
+
+bot.add_blueprint(users_blueprint)
+
+bot.start()
+
+bot.idle()
