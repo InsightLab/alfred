@@ -4,24 +4,17 @@ from alfredbot.exceptions.UserNotFoundException import UserNotFoundException
 from BotMother.Blueprint import Blueprint
 from BotMother.Conversation import Conversation
 
-import pandas as pd
+from .helper import Helper
+
 import re
+import pandas as pd
 
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from telegram.ext import Filters
 
 users_blueprint = Blueprint()
-df = pd.read_csv("data/users.csv")
-admins_id = df[df['type']==1]['id'].values
+
 mail_regex = re.compile('[^@]+@[^@]+\\.[^@]+')
-
-def is_adm(id):
-	return id in admins_id
-
-def notify_admins(bot,text):
-	for id in admins_id:
-		print("Sending to {}".format(id))
-		bot.sendMessage(text=text,chat_id=str(id))
 
 def map_users_to_keyboard(users,separator="\n",max_per_line=3):
 	line = 0
@@ -73,8 +66,9 @@ def request_email(bot,update,user_data):
 		new_user = user_data["user"]
 		new_user["mail"] = mail
 		new_user.save()
+		Helper.reload_data()
 		update.message.reply_text("Request sent to be inspected for one of ours admins.")
-		notify_admins(bot,"{},{} to join us".format(new_user["last_name"],new_user["first_name"]))
+		Helper.notify_admins(bot,"{},{} to join us".format(new_user["last_name"],new_user["first_name"]))
 		return Conversation.END
 	else:
 		update.message.reply_text("Invalid email. Please try again or send /cancel")
@@ -97,9 +91,10 @@ manage_users_conversation = Conversation()
 
 def start_get_users(bot,update,user_data):
 	user_id = update.message.from_user.id
-	if is_adm(user_id):
+	if Helper.is_adm(user_id):
 		text = "Choose an user to review or /done to end this conversation."
 
+		df = pd.read_csv("data/users.csv")
 		users = [{p:row.values[i] for i,p in enumerate(df.columns)} for _,row in df.iterrows()]
 		# for user in users:
 		# 	text += "\t\t/{} {} {} ({})\n".format(user["id"],user["first_name"],user["last_name"],user["mail"])
@@ -112,9 +107,10 @@ def start_get_users(bot,update,user_data):
 
 def start_check_requests(bot,update,user_data):
 	user_id = update.message.from_user.id
-	if is_adm(user_id):
+	if Helper.is_adm(user_id):
 		text = "Choose an user to review or /done to end this conversation:\n\n"
 
+		df = pd.read_csv("data/users.csv")
 		users = [{p:row.values[i] for i,p in enumerate(df.columns)} for _,row in df[df.type==-1].iterrows()]
 		if len(users)==0:
 			update.message.reply_text("No request to analyse")
@@ -145,7 +141,7 @@ def review_user(bot,update,user_data):
 	user_id = msg.split("\n")[0]
 
 	try:
-		user_id = int(float(user_id))
+		user_id = int(user_id)
 		user = User({"id":user_id})
 		user.reload()
 		user_type = ["pendent","regular","administrator"][user["type"]+1]
@@ -188,11 +184,14 @@ def update_user(bot,update,user_data):
 		update.message.reply_text("Invalid command. Try again")
 		return "UPDATE_USER"
 
-	update.message.reply_text("Operation {} done! If you want to do something else, just choose another user or type /done .".format(command))
+	Helper.reload_data()
+	
+	update.message.reply_text("Operation {} done! If you want to do something else, just choose another user or type /done .".format(command),
+		reply_markup=ReplyKeyboardMarkup(user_data["keyboard"],one_time_keyboard=True))
 	return "REVIEW_USER"
 
 def done(bot,update):
-	update.message.reply_text("Have a nice day!")
+	update.message.reply_text("Have a nice day!",reply_markup=ReplyKeyboardRemove())
 	return Conversation.END
 
 manage_users_conversation.add_command_entry_point("users",start_get_users,pass_user_data=True)

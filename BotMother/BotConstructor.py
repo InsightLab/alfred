@@ -27,7 +27,7 @@ class BotConstructor():
 			By default, the log of the bot will be displayed
 		"""
 		if show_log:			
-			logging.basicConfig(level=logging.DEBUG,
+			logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 		if not bot:
 			if token:

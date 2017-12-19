@@ -6,17 +6,6 @@ from alfredbot.exceptions.BadTimeException import BadTimeException
 
 class WorkstationController():
 
-	def add_workstation(self,id,description):
-		workstation = Workstation({
-			"id":id,
-			"description":description
-			})
-		
-		workstation.save()
-
-		return workstation
-
-
 	def get_workstations(self):
 		return Workstation().get_all()
 
@@ -51,7 +40,6 @@ class WorkstationController():
 			result = {"err":str(e)}
 
 		return result
-
 
 
 
