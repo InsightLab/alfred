@@ -153,17 +153,27 @@ def check_workstations_slots(bot,update,user_data):
 
 		update.message.reply_text(text)
 
-		user_slots = [time for time in sorted(slots) if slots[time]==update.message.from_user.id]
-		
-		if len(user_slots)>0:
-			update.message.reply_text("You have time slots on this workstations. Send /release if you want to release some slots or /back to see the workstations again.",
-				reply_markup=ReplyKeyboardMarkup([["/back"],["/release"]]))
-			user_data["slots"] = user_slots
+		if Helper.is_adm(update.message.from_user.id):
+			slots = [time for time in sorted(slots)]
+			update.message.reply_text("As an administrator, you can release any time slots on this workstations. Send /release if you want to release some slots or /back to see the workstations again.",
+					reply_markup=ReplyKeyboardMarkup([["/back"],["/release"]]))
+			user_data["slots"] = slots
+
 			return "BACK_OR_RELEASE"
-		
+
 		else:
-			update.message.reply_text("Send /back to return to workstations selection.")
-			return "BACK"
+			user_slots = [time for time in sorted(slots) if slots[time]==update.message.from_user.id]
+		
+			if len(user_slots)>0:
+				update.message.reply_text("You have time slots on this workstations. Send /release if you want to release some slots or /back to see the workstations again.",
+					reply_markup=ReplyKeyboardMarkup([["/back"],["/release"]]))
+				user_data["slots"] = user_slots
+		
+				return "BACK_OR_RELEASE"
+		
+			else:
+				update.message.reply_text("Send /back to return to workstations selection.")
+				return "BACK"
 		
 
 	else:
@@ -256,6 +266,7 @@ def releasing_workstation(bot,update,user_data):
 
 	return "RELEASING_WORKSTATION"
 
+# /done
 def done(bot,update):
 	update.message.reply_text("Have a nice day!",reply_markup=ReplyKeyboardRemove())
 	return Conversation.END
