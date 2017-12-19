@@ -1,4 +1,3 @@
-from alfredbot.controllers.User import UserController
 from alfredbot.models.User import User
 from alfredbot.exceptions.UserNotFoundException import UserNotFoundException
 
@@ -23,6 +22,19 @@ def notify_admins(bot,text):
 	for id in admins_id:
 		print("Sending to {}".format(id))
 		bot.sendMessage(text=text,chat_id=str(id))
+
+def map_users_to_keyboard(users,separator="\n",max_per_line=3):
+	line = 0
+	keyboard = [[]]
+	for i,user in enumerate(users):
+		name = "{} {}".format(user["first_name"],user["last_name"])
+		text = "{}{}{}".format(user["id"],separator,name)
+		keyboard[line].append(text)
+		
+		if (i+1)%max_per_line==0:
+			line += 1
+			keyboard.append([])
+	return keyboard
 
 #-------------------------------------
 
@@ -86,14 +98,14 @@ manage_users_conversation = Conversation()
 def start_get_users(bot,update,user_data):
 	user_id = update.message.from_user.id
 	if is_adm(user_id):
-		text = "Choose an user to review or /done to end this conversation:\n\n"
+		text = "Choose an user to review or /done to end this conversation."
 
 		users = [{p:row.values[i] for i,p in enumerate(df.columns)} for _,row in df.iterrows()]
-		for user in users:
-			text += "\t\t/{} {} {} ({})\n".format(user["id"],user["first_name"],user["last_name"],user["mail"])
-
-		update.message.reply_text(text)
-
+		# for user in users:
+		# 	text += "\t\t/{} {} {} ({})\n".format(user["id"],user["first_name"],user["last_name"],user["mail"])
+		keyboard = map_users_to_keyboard(users)
+		update.message.reply_text(text,reply_markup=ReplyKeyboardMarkup(keyboard,one_time_keyboard=True))
+		user_data["keyboard"] = keyboard
 		return "REVIEW_USER"
 	else:
 		update.message.reply_text("You are not allowed to do this operation.")
@@ -108,11 +120,12 @@ def start_check_requests(bot,update,user_data):
 			update.message.reply_text("No request to analyse")
 			return Conversation.END
 
-		for user in users:
-			text += "\t\t/{} {} {} ({})\n".format(user["id"],user["first_name"],user["last_name"],user["mail"])
+		# for user in users:
+		# 	text += "\t\t/{} {} {} ({})\n".format(user["id"],user["first_name"],user["last_name"],user["mail"])
 
-		update.message.reply_text(text)
-
+		keyboard = map_users_to_keyboard(users)
+		update.message.reply_text(text,reply_markup=ReplyKeyboardMarkup(keyboard,one_time_keyboard=True))
+		user_data["keyboard"] = keyboard
 		return "REVIEW_USER"
 	else:
 		update.message.reply_text("You are not allowed to do this operation.")
@@ -121,18 +134,23 @@ def review_user(bot,update,user_data):
 	global df
 	df = pd.read_csv("data/users.csv")
 
-	if update.message.text == "/done":
-		return done(bot,update)
+	# if update.message.text == "/done":
+	# 	return done(bot,update)
+	msg = update.message.text
 
-	user_id = update.message.text.replace("/","")
+	if not len(msg.split("\n"))==2:
+		update.message.reply_text("You didn't choose a valid option. Try again or send /done .",
+			reply_markup=ReplyKeyboardMarkup(user_data["keyboard"],one_time_keyboard=True))
+
+	user_id = msg.split("\n")[0]
 
 	try:
 		user_id = int(float(user_id))
 		user = User({"id":user_id})
 		user.reload()
 		user_type = ["pendent","regular","administrator"][user["type"]+1]
-		update.message.reply_text("User chosen:\nName: {} {}\nEmail: {}\nType: ".format(
-			user["first_name"],user["last_name"],user["mail"],user_type))
+		update.message.reply_text("User chosen:\nName: {} {}\nEmail: {}\nUsername: {}\nType: {}".format(
+			user["first_name"],user["last_name"],user["mail"],user["username"],user_type))
 
 		reply_keyboard = [["ADM","USER"]]
 		text = ""
@@ -179,7 +197,7 @@ def done(bot,update):
 
 manage_users_conversation.add_command_entry_point("users",start_get_users,pass_user_data=True)
 manage_users_conversation.add_command_entry_point("check_requests",start_check_requests,pass_user_data=True)
-manage_users_conversation.add_message_to_state("REVIEW_USER",review_user,pass_user_data=True,message_filter=Filters.all)
+manage_users_conversation.add_message_to_state("REVIEW_USER",review_user,pass_user_data=True)
 manage_users_conversation.add_message_to_state("UPDATE_USER",update_user,pass_user_data=True)
 manage_users_conversation.add_command_to_fallback("done",done)
 
