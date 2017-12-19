@@ -99,6 +99,36 @@ def review_workstation(bot,update,user_data):
 			reply_markup=ReplyKeyboardMarkup(user_data["workstations_keyboard"],one_time_keyboard=True))
 
 		return "REVIEW_WORKSTATION"
+
+# /update
+def update_workstation(bot,update,user_data):
+	if not Helper.is_adm(update.message.from_user.id):
+		update.message.reply_text("Permission denied. Send /back to return to workstation selection.")
+		return "BACK"
+
+	update.message.reply_text("Send the new description to the workstation.")
+	return "UPDATING_WORKSTATION"
+
+# message with description
+def updating_workstation(bot,update,user_data):
+	description = update.message.text.replace(","," ").replace("\n"," ")
+
+	user_data["workstation"]["description"] = description
+	user_data["workstation"].save()
+
+	update.message.reply_text("Workstation description updated. Send /back to return to workstation selection.")
+	return "BACK"
+
+# /remove
+def remove_workstation(bot,update,user_data):
+	if not Helper.is_adm(update.message.from_user.id):
+		update.message.reply_text("Permission denied. Send /back to return to workstation selection.")
+		return "BACK"
+
+	user_data["workstation"].remove()
+	update.message.reply_text("Workstaton removed. Send /back to return to workstation selection.")
+	return "BACK"
+
 #/free
 def check_workstation_free_day(bot,update,user_data):
 	user_data["free"] = True
@@ -277,6 +307,10 @@ manage_workstations_conversation.add_message_to_state("REVIEW_WORKSTATION",revie
 
 manage_workstations_conversation.add_command_to_state("CHECK_WORKSTATION","free",check_workstation_free_day,pass_user_data=True)
 manage_workstations_conversation.add_command_to_state("CHECK_WORKSTATION","occupied",check_workstation_occupied_day,pass_user_data=True)
+manage_workstations_conversation.add_command_to_state("CHECK_WORKSTATION","update",update_workstation,pass_user_data=True)
+manage_workstations_conversation.add_command_to_state("CHECK_WORKSTATION","remove",remove_workstation,pass_user_data=True)
+
+manage_workstations_conversation.add_message_to_state("UPDATING_WORKSTATION",updating_workstation,pass_user_data=True)
 
 manage_workstations_conversation.add_message_to_state("CHECK_WORKSTATION_SLOTS",check_workstations_slots,pass_user_data=True)
 

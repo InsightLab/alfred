@@ -20,7 +20,12 @@ class Workstation(AbstractPandas):
 			raise WorkstationNotFoundException("Workstation {} not found".format(self["id"]))
 
 	def remove(self):
+		id = self["id"]
 		super().remove()
+		for day in ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"]:
+			locations = pd.read_csv("data/{}-locations.csv".format(day))
+			locations = locations[locations.workstation != id]
+			locations.to_csv("data/{}-locations.csv".format(day),index=False)
 
 	def get_schedules(self,day,free=False):
 		if not self.id:

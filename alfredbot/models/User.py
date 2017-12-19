@@ -16,3 +16,6 @@ class User(AbstractPandas):
 		super().reload()
 		if "first_name" not in self:
 			raise UserNotFoundException("User {} not found".format(self.id))
+
+	def remove(self):
+		super().remove()
