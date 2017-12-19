@@ -139,6 +139,7 @@ def review_user(bot,update,user_data):
 			reply_markup=ReplyKeyboardMarkup(user_data["keyboard"],one_time_keyboard=True))
 
 	user_id = msg.split("\n")[0]
+	user_data["selected"] = msg
 
 	try:
 		user_id = int(user_id)
@@ -180,13 +181,14 @@ def update_user(bot,update,user_data):
 	elif command == "DISCARD" or command == "REMOVE":
 		bot.sendMessage(chat_id=str(user["id"]),text="Your access on Insight Data Science Lab has been denied.")
 		user.remove()
+		user_data["keyboard"].remove(user_data["selected"])
 	else:
 		update.message.reply_text("Invalid command. Try again")
 		return "UPDATE_USER"
 
 	Helper.reload_data()
 	
-	update.message.reply_text("Operation {} done! If you want to do something else, just choose another user or type /done .".format(command),
+	update.message.reply_text("Operation {} done! Type /back to return to users .".format(command),
 		reply_markup=ReplyKeyboardMarkup(user_data["keyboard"],one_time_keyboard=True))
 	return "REVIEW_USER"
 

@@ -18,4 +18,9 @@ class User(AbstractPandas):
 			raise UserNotFoundException("User {} not found".format(self.id))
 
 	def remove(self):
+		id = self["id"]
 		super().remove()
+		for day in ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"]:
+			locations = pd.read_csv("data/{}-locations.csv".format(day))
+			locations = locations.replace(to_replace=id,value="")
+			locations.to_csv("data/{}-locations.csv".format(day),index=False)
