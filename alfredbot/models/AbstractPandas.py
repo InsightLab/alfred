@@ -8,13 +8,18 @@ class AbstractPandas(dict):
 
 	#save in the database
 	def save(self):
+		save_type = ""
 		if not self.df[self.df.id==self.id].empty:
 			self.df.loc[self.df.id==self.id,self.df.columns] = [self.get(k,"") for k in self.df.columns]
+			save_type = "UPDATE"
 		else:
 			data = pd.DataFrame([[self.get(k,"") for k in self.df.columns]], columns = self.df.columns)
 			self.df = self.df.append(data, ignore_index=True)
+			save_type = "NEW"
 		
 		self.df.to_csv(self.file,index=False)
+		return save_type
+
 	#load from the database
 	def reload(self):
 		if self.id:

@@ -14,6 +14,13 @@ class Workstation(AbstractPandas):
 
 	properties = ["id","description"]
 
+	def save(self):
+		if super().save() == "NEW":
+			for day in ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"]:
+				locations = pd.read_csv("data/{}-locations.csv".format(day))
+				locations = locations.append({"workstation":self["id"]},ignore_index=True)
+				locations.to_csv("data/{}-locations.csv".format(day),index=False)
+
 	def reload(self):
 		super().reload()
 		if "description" not in self:

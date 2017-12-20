@@ -60,11 +60,59 @@ def start_workstations(bot,update,user_data):
 
 	workstations = controller.get_workstations()
 	keyboard = map_workstations_to_keyboard(workstations)
+
+	text = "Choose a workstation to continue."
+	if Helper.is_adm(user_id):
+		keyboard.append(["/add"])
+		text += "Send /add to add a new workstation."
+
 	user_data["workstations_keyboard"] = keyboard
-	update.message.reply_text("Choose a workstation to continue",
+	update.message.reply_text(text,
 		reply_markup=ReplyKeyboardMarkup(keyboard,one_time_keyboard=True))
 
 	return "REVIEW_WORKSTATION"
+
+# /add
+def add_workstation(bot,update,user_data):
+	if not Helper.is_adm(update.message.from_user.id):
+		update.message.reply_text("Permission denied. Send /back to return to workstation selection.")
+		return "BACK"
+
+	update.message.reply_text("Choose an id to the new workstation.")
+
+	return "ADDING_WORKSTATION_ID"
+
+# message with workstation id
+def adding_workstation_id(bot,update,user_data):
+	
+	try:
+		id = int(update.message.text)
+		workstation = Workstation({"id":id})
+		workstation.reload()
+		update.message.reply_text("ID already in use. Try another one.")
+		return "ADDING_WORKSTATION_ID"
+
+	except WorkstationNotFoundException:
+		user_data["workstation"] = workstation
+		update.message.reply_text("Ok, now send a description to this workstation.")
+		return "ADDING_WORKSTATION_DESCRIPTION"
+
+	except Exception:
+		update.message.reply_text("Invalid ID. Must be a integer number. Try another one.")	
+		return "ADDING_WORKSTATION_ID"	
+
+# message with workstation description
+def adding_workstation_description(bot,update,user_data):
+	description = update.message.text.replace(","," ").replace("\n"," ")
+
+	workstation = user_data["workstation"]
+
+	workstation["description"] = description
+	workstation.save()
+
+	update.message.reply_text("Workstation {} ({}) created. Send /back to return to workstation selection.".format(
+		workstation["id"],workstation["description"]))
+	return "BACK"
 
 # message (workstation id)
 def review_workstation(bot,update,user_data):
@@ -304,6 +352,11 @@ def done(bot,update):
 manage_workstations_conversation.add_command_entry_point("workstations",start_workstations,pass_user_data=True)
 
 manage_workstations_conversation.add_message_to_state("REVIEW_WORKSTATION",review_workstation,pass_user_data=True)
+manage_workstations_conversation.add_command_to_state("REVIEW_WORKSTATION","add",add_workstation,pass_user_data=True)
+
+manage_workstations_conversation.add_message_to_state("ADDING_WORKSTATION_ID",adding_workstation_id,pass_user_data=True)
+
+manage_workstations_conversation.add_message_to_state("ADDING_WORKSTATION_DESCRIPTION",adding_workstation_description,pass_user_data=True)
 
 manage_workstations_conversation.add_command_to_state("CHECK_WORKSTATION","free",check_workstation_free_day,pass_user_data=True)
 manage_workstations_conversation.add_command_to_state("CHECK_WORKSTATION","occupied",check_workstation_occupied_day,pass_user_data=True)
