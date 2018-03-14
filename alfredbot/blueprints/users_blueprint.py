@@ -68,7 +68,7 @@ def request_email(bot,update,user_data):
 		new_user.save()
 		Helper.reload_data()
 		update.message.reply_text("Request sent to be inspected for one of ours admins.")
-		Helper.notify_admins(bot,"{},{} to join us".format(new_user["last_name"],new_user["first_name"]))
+		Helper.notify_admins(bot,"{},{} to join us .To aprove, type /user and select the id {}".format(new_user["last_name"],new_user["first_name"],new_user["id"]))
 		return Conversation.END
 	else:
 		update.message.reply_text("Invalid email. Please try again or send /cancel")

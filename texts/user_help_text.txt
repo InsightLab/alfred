@@ -1,0 +1,4 @@
+Master, you are a member from Insight Lab.
+I can help you to check your schedules on the lab's workstations, showing your reservations and helping you to request more time or release them. Just type /workstations .
+
+Hope I was clear and helpful.

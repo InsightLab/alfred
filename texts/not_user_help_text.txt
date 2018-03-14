@@ -1,0 +1,3 @@
+Insight Data Science Lab (http://http://insightlab.ufc.br/) is a Laboratory from Universidade Federal do Ceará. If you are a member and want my help, first you must request your access. If one of the administrators aprove your access, I can help you :)
+
+To request rou acces, type /request_access
