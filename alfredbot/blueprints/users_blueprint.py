@@ -68,7 +68,7 @@ def request_email(bot,update,user_data):
 		new_user.save()
 		Helper.reload_data()
 		update.message.reply_text("Request sent to be inspected for one of ours admins.")
-		Helper.notify_admins(bot,"{},{} to join us .To aprove, type /user and select the id {}".format(new_user["last_name"],new_user["first_name"],new_user["id"]))
+		Helper.notify_admins(bot,"{},{} to join us .To aprove, type /check_requests and select the id {}".format(new_user["last_name"],new_user["first_name"],new_user["id"]))
 		return Conversation.END
 	else:
 		update.message.reply_text("Invalid email. Please try again or send /cancel")
@@ -92,7 +92,7 @@ manage_users_conversation = Conversation()
 def start_get_users(bot,update,user_data):
 	user_id = update.message.from_user.id
 	if Helper.is_adm(user_id):
-		text = "Choose an user to review or /done to end this conversation."
+		text = "Choose an user to review or /done to end this conversation. The operation can be aborted by typing /cancel ."
 
 		df = pd.read_csv("data/users.csv")
 		users = [{p:row.values[i] for i,p in enumerate(df.columns)} for _,row in df.iterrows()]
@@ -103,12 +103,12 @@ def start_get_users(bot,update,user_data):
 		user_data["keyboard"] = keyboard
 		return "REVIEW_USER"
 	else:
-		update.message.reply_text("You are not allowed to do this operation.")
+		update.message.reply_text("You are not allowed to do this operation")
 
 def start_check_requests(bot,update,user_data):
 	user_id = update.message.from_user.id
 	if Helper.is_adm(user_id):
-		text = "Choose an user to review or /done to end this conversation:\n\n"
+		text = "Choose an user to review or /done to end this conversation. The operation can be aborted by typing /cancel ."
 
 		df = pd.read_csv("data/users.csv")
 		users = [{p:row.values[i] for i,p in enumerate(df.columns)} for _,row in df[df.type==-1].iterrows()]
@@ -135,7 +135,7 @@ def review_user(bot,update,user_data):
 	msg = update.message.text
 
 	if not len(msg.split("\n"))==2:
-		update.message.reply_text("You didn't choose a valid option. Try again or send /done .",
+		update.message.reply_text("You didn't choose a valid option. Try again or send /cancel .",
 			reply_markup=ReplyKeyboardMarkup(user_data["keyboard"],one_time_keyboard=True))
 
 	user_id = msg.split("\n")[0]
@@ -181,14 +181,17 @@ def update_user(bot,update,user_data):
 	elif command == "DISCARD" or command == "REMOVE":
 		bot.sendMessage(chat_id=str(user["id"]),text="Your access on Insight Data Science Lab has been denied.")
 		user.remove()
-		user_data["keyboard"].remove(user_data["selected"])
+		try:
+			user_data["keyboard"].remove(user_data["selected"])
+		except:
+			pass
 	else:
 		update.message.reply_text("Invalid command. Try again")
 		return "UPDATE_USER"
 
 	Helper.reload_data()
 	
-	update.message.reply_text("Operation {} done! Type /back to return to users .".format(command),
+	update.message.reply_text("Operation {} done! Choose another user or type /done .".format(command),
 		reply_markup=ReplyKeyboardMarkup(user_data["keyboard"],one_time_keyboard=True))
 	return "REVIEW_USER"
 
@@ -196,10 +199,15 @@ def done(bot,update):
 	update.message.reply_text("Have a nice day!",reply_markup=ReplyKeyboardRemove())
 	return Conversation.END
 
+def cancel(bot,update):
+	update.message.reply_text("Operation aborted.")
+	return Conversation.END
+
 manage_users_conversation.add_command_entry_point("users",start_get_users,pass_user_data=True)
 manage_users_conversation.add_command_entry_point("check_requests",start_check_requests,pass_user_data=True)
 manage_users_conversation.add_message_to_state("REVIEW_USER",review_user,pass_user_data=True)
 manage_users_conversation.add_message_to_state("UPDATE_USER",update_user,pass_user_data=True)
 manage_users_conversation.add_command_to_fallback("done",done)
+manage_users_conversation.add_command_to_fallback("cancel",cancel)
 
 users_blueprint.add_conversation(manage_users_conversation)

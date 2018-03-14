@@ -1,6 +1,8 @@
 from BotMother.BotConstructor import BotConstructor
 
 from alfredbot.models.User import User
+from alfredbot.exceptions.UserNotFoundException import UserNotFoundException
+
 from alfredbot.blueprints.users_blueprint import users_blueprint
 from alfredbot.blueprints.workstations_blueprint import workstations_blueprint
 

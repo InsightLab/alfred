@@ -60,7 +60,7 @@ def start_workstations(bot,update,user_data):
 
 	workstations = controller.get_workstations()
 	keyboard = map_workstations_to_keyboard(workstations)
-
+	update.message.reply_text("Any time you can send:\n/cancel to abort the current operation\n/done to end the conversation")
 	text = "Choose a workstation to continue."
 	if Helper.is_adm(user_id):
 		keyboard.append(["/add"])
@@ -75,7 +75,7 @@ def start_workstations(bot,update,user_data):
 # /add
 def add_workstation(bot,update,user_data):
 	if not Helper.is_adm(update.message.from_user.id):
-		update.message.reply_text("Permission denied. Send /back to return to workstation selection.")
+		update.message.reply_text("Permission denied. Send /back to return to workstation selection or /done to finish this conversation.")
 		return "BACK"
 
 	update.message.reply_text("Choose an id to the new workstation.")
@@ -110,7 +110,7 @@ def adding_workstation_description(bot,update,user_data):
 	workstation["description"] = description
 	workstation.save()
 
-	update.message.reply_text("Workstation {} ({}) created. Send /back to return to workstation selection.".format(
+	update.message.reply_text("Workstation {} ({}) created. Send \n/back to return to workstation selection\n/done to finish this conversation.".format(
 		workstation["id"],workstation["description"]))
 	return "BACK"
 
@@ -135,7 +135,7 @@ def review_workstation(bot,update,user_data):
 			workstation["id"],workstation["description"])
 
 		update.message.reply_text(text)
-		update.message.reply_text("Use /free to check free time slots;\n/occupied to check for occupied slots{}".format(aux_text),
+		update.message.reply_text("Use \n/free to check free time slots and, if you want, request one\n/occupied to check for occupied slots and, if you have some slots, free them{}".format(aux_text),
 			reply_markup=ReplyKeyboardMarkup(keyboard,one_time_keyboard=True))
 
 		user_data["options_keyboard"] = keyboard
@@ -143,7 +143,7 @@ def review_workstation(bot,update,user_data):
 		return "CHECK_WORKSTATION"
 
 	except WorkstationNotFoundException:
-		update.message.reply_text("Invalid workstation. Please, choose one.",
+		update.message.reply_text("Invalid workstation. Please, choose one from the keyboard.",
 			reply_markup=ReplyKeyboardMarkup(user_data["workstations_keyboard"],one_time_keyboard=True))
 
 		return "REVIEW_WORKSTATION"
@@ -151,7 +151,7 @@ def review_workstation(bot,update,user_data):
 # /update
 def update_workstation(bot,update,user_data):
 	if not Helper.is_adm(update.message.from_user.id):
-		update.message.reply_text("Permission denied. Send /back to return to workstation selection.")
+		update.message.reply_text("Permission denied. Send \n/back to return to workstation selection.")
 		return "BACK"
 
 	update.message.reply_text("Send the new description to the workstation.")
@@ -164,17 +164,17 @@ def updating_workstation(bot,update,user_data):
 	user_data["workstation"]["description"] = description
 	user_data["workstation"].save()
 
-	update.message.reply_text("Workstation description updated. Send /back to return to workstation selection.")
+	update.message.reply_text("Workstation description updated. Send \n/back to return to workstation selection.")
 	return "BACK"
 
 # /remove
 def remove_workstation(bot,update,user_data):
 	if not Helper.is_adm(update.message.from_user.id):
-		update.message.reply_text("Permission denied. Send /back to return to workstation selection.")
+		update.message.reply_text("Permission denied. Send \n/back to return to workstation selection.")
 		return "BACK"
 
 	user_data["workstation"].remove()
-	update.message.reply_text("Workstaton removed. Send /back to return to workstation selection.")
+	update.message.reply_text("Workstaton removed. Send \n/back to return to workstation selection.")
 	return "BACK"
 
 #/free
@@ -214,7 +214,7 @@ def check_workstations_slots(bot,update,user_data):
 	user_data["day"] = day.lower()	
 	slots = user_data["workstation"].get_schedules(day.lower(),free=user_data["free"])
 	if len(slots) == 0:
-		update.message.reply_text("There is no slot to show. Send /back to return to workstations selection.")
+		update.message.reply_text("There is no slot to show. Send \n/back to return to workstations selection.")
 		return "BACK"
 
 	if not user_data["free"]:
@@ -233,7 +233,7 @@ def check_workstations_slots(bot,update,user_data):
 
 		if Helper.is_adm(update.message.from_user.id):
 			slots = [time for time in sorted(slots)]
-			update.message.reply_text("As an administrator, you can release any time slots on this workstations. Send /release if you want to release some slots or /back to see the workstations again.",
+			update.message.reply_text("As an administrator, you can release any time slots on this workstations. Send \n/release if you want to release some slots\n/back to see the workstations again.",
 					reply_markup=ReplyKeyboardMarkup([["/back"],["/release"]]))
 			user_data["slots"] = slots
 
@@ -243,14 +243,14 @@ def check_workstations_slots(bot,update,user_data):
 			user_slots = [time for time in sorted(slots) if slots[time]==update.message.from_user.id]
 		
 			if len(user_slots)>0:
-				update.message.reply_text("You have time slots on this workstations. Send /release if you want to release some slots or /back to see the workstations again.",
+				update.message.reply_text("You have time slots on this workstations. Send \n/release if you want to release some slots\n/back to see the workstations again.",
 					reply_markup=ReplyKeyboardMarkup([["/back"],["/release"]]))
 				user_data["slots"] = user_slots
 		
 				return "BACK_OR_RELEASE"
 		
 			else:
-				update.message.reply_text("Send /back to return to workstations selection.")
+				update.message.reply_text("Send /back to return to workstations selection")
 				return "BACK"
 		
 
@@ -261,7 +261,7 @@ def check_workstations_slots(bot,update,user_data):
 
 		update.message.reply_text(text)
 
-		update.message.reply_text("If you want to request a time slot, send /request . Otherwise, send /back to return to workstations selection",
+		update.message.reply_text("If you want to request a time slot, send /request .\nOtherwise, send /back to return to workstations selection",
 				reply_markup=ReplyKeyboardMarkup([["/back"],["/request"]]))
 
 		return "BACK_OR_REQUEST"
@@ -272,7 +272,7 @@ def request_workstation(bot,update,user_data):
 
 	keyboard = map_times_to_keyboard(slots)
 	user_data["slots_keyboard"] = keyboard
-	update.message.reply_text("Select a slot to request.",
+	update.message.reply_text("Select a slot to request. WARNING: you must select time slots of half hour each.",
 		reply_markup=ReplyKeyboardMarkup(keyboard,one_time_keyboard=True))
 
 	return "REQUESTING_WORKSTATION"
@@ -296,7 +296,7 @@ def requesting_workstation(bot,update,user_data):
 	
 	
 	if len(user_data["slots"])==0:
-		update.message.reply_text("There are no more slots on this workstation. Send /back to return to workstations selection.")
+		update.message.reply_text("There are no more slots on this workstation.\nSend /back to return to workstations selection.")
 		return "BACK"
 
 	keyboard = map_times_to_keyboard(user_data["slots"])
@@ -334,12 +334,12 @@ def releasing_workstation(bot,update,user_data):
 	user_data["slots"].remove(time)
 
 	if len(user_data["slots"])==0:
-		update.message.reply_text("You have no more slots on this workstation. Send /back to return to workstations selection.")
+		update.message.reply_text("You have no more slots on this workstation.\nSend /back to return to workstations selection.")
 		return "BACK"
 
 	keyboard = map_times_to_keyboard(user_data["slots"])
 	user_data["slots_keyboard"] = keyboard
-	update.message.reply_text("Select a slot to release or send /back to return to workstations selection.",
+	update.message.reply_text("Select a slot to release or send\n/back to return to workstations selection.",
 		reply_markup=ReplyKeyboardMarkup(keyboard,one_time_keyboard=True))
 
 	return "RELEASING_WORKSTATION"
@@ -347,6 +347,10 @@ def releasing_workstation(bot,update,user_data):
 # /done
 def done(bot,update):
 	update.message.reply_text("Have a nice day!",reply_markup=ReplyKeyboardRemove())
+	return Conversation.END
+
+def cancel(bot,update):
+	update.message.reply_text("Operation aborted",reply_markup=ReplyKeyboardRemove())
 	return Conversation.END
 
 manage_workstations_conversation.add_command_entry_point("workstations",start_workstations,pass_user_data=True)
@@ -381,5 +385,6 @@ manage_workstations_conversation.add_message_to_state("REQUESTING_WORKSTATION",r
 
 manage_workstations_conversation.add_command_to_fallback("back",start_workstations,pass_user_data=True)
 manage_workstations_conversation.add_command_to_fallback("done",done)
+manage_workstations_conversation.add_command_to_fallback("cancel",cancel)
 
 workstations_blueprint.add_conversation(manage_workstations_conversation)
