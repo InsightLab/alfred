@@ -65,14 +65,28 @@ def request_email(bot,update,user_data):
 	if mail_regex.match(mail):
 		new_user = user_data["user"]
 		new_user["mail"] = mail
+		update.message.reply_text("Thank you. Now, please, give a phone number to contact (only numbers)")
+		return "REQUEST_PHONE"
+	else:
+		update.message.reply_text("Invalid email. Please try again or send /cancel")
+		return "REQUEST_EMAIL"
+
+def request_phone(bot,update,user_data):
+	number = update.message.text
+	try:
+		number = int(number)
+		new_user = user_data["user"]
+		new_user["phone"] = number
+		new_user["role"] = ""
 		new_user.save()
 		Helper.reload_data()
 		update.message.reply_text("Request sent to be inspected for one of ours admins.")
 		Helper.notify_admins(bot,"{},{} to join us .To aprove, type /check_requests and select the id {}".format(new_user["last_name"],new_user["first_name"],new_user["id"]))
 		return Conversation.END
-	else:
-		update.message.reply_text("Invalid email. Please try again or send /cancel")
-		return "REQUEST_EMAIL"
+	except Exception as e:
+		print(e)
+		update.message.reply_text("Invalid number. Please try again or send /cancel")
+		return "REQUEST_PHONE"
 
 def cancel_request(bot,update):
 	update.message.reply_text("Request aborted. Have a nice day!")
@@ -81,6 +95,7 @@ def cancel_request(bot,update):
 
 request_access_conversation.add_command_entry_point("request_access",start_request,pass_user_data=True)
 request_access_conversation.add_message_to_state("REQUEST_EMAIL",request_email,pass_user_data=True)
+request_access_conversation.add_message_to_state("REQUEST_PHONE",request_phone,pass_user_data=True)
 request_access_conversation.add_command_to_fallback("cancel",cancel_request)
 
 users_blueprint.add_conversation(request_access_conversation)
@@ -146,8 +161,8 @@ def review_user(bot,update,user_data):
 		user = User({"id":user_id})
 		user.reload()
 		user_type = ["pendent","regular","administrator"][user["type"]+1]
-		update.message.reply_text("User chosen:\nName: {} {}\nEmail: {}\nUsername: {}\nType: {}".format(
-			user["first_name"],user["last_name"],user["mail"],user["username"],user_type))
+		update.message.reply_text("User chosen:\nName: {} {}\nEmail: {}\nUsername: {}\nType: {}\nRole: {}\nPhone: {}".format(
+			user["first_name"],user["last_name"],user["mail"],user["username"],user_type,user["role"],user["phone"]))
 
 		reply_keyboard = [["ADM","USER"]]
 		text = ""
@@ -161,15 +176,42 @@ def review_user(bot,update,user_data):
 		
 		update.message.reply_text(text,reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 		user_data["user"] = user
-		return "UPDATE_USER"
+		return "UPDATE_ROLE"
 
 	except:
 		update.message.reply_text("Invalid Id. Try again.")
-		return "REVIEW_USER"	
+		return "REVIEW_USER"
 
-def update_user(bot,update,user_data):
+def update_role(bot,update,user_data):
 	command = update.message.text
 	user = user_data["user"]
+
+	if command not in ["ADM","USER"] and \
+	(user["type"] == -1 and not command == "DISCARD") and \
+	(user["type"] > -1 and not command == "REMOVE"):
+		update.message.reply_text("Invalid command. Try again")
+		return "UPDATE_ROLE"
+
+	user_data["command"] = command
+	roles = [["Researcher"],["Ph.D Candidate"],["Master Student"],["Visitor"],["Undergraduate"],["Professional"]]
+
+	update.message.reply_text("Wich role this user have on the lab?",
+		reply_markup=ReplyKeyboardMarkup(roles, one_time_keyboard=True))
+
+	return "UPDATE_USER"
+
+def update_user(bot,update,user_data):
+	role = update.message.text
+	roles = ["Researcher","Ph.D Candidate","Master Student","Visitor","Undergraduate","Professional"]
+
+	if not role in roles:
+		update.message.reply_text("Invalid role. Choose a valid one:",
+		reply_markup=ReplyKeyboardMarkup(roles, one_time_keyboard=True))
+		return "UPDATE_USER"
+
+	command = user_data["command"]
+	user = user_data["user"]
+	user["role"] = role
 	if command == "ADM":
 		user["type"] = 1
 		user.save()
@@ -206,6 +248,7 @@ def cancel(bot,update):
 manage_users_conversation.add_command_entry_point("users",start_get_users,pass_user_data=True)
 manage_users_conversation.add_command_entry_point("check_requests",start_check_requests,pass_user_data=True)
 manage_users_conversation.add_message_to_state("REVIEW_USER",review_user,pass_user_data=True)
+manage_users_conversation.add_message_to_state("UPDATE_ROLE",update_role,pass_user_data=True)
 manage_users_conversation.add_message_to_state("UPDATE_USER",update_user,pass_user_data=True)
 manage_users_conversation.add_command_to_fallback("done",done)
 manage_users_conversation.add_command_to_fallback("cancel",cancel)
