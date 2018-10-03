@@ -1,0 +1,6 @@
+Master, you are an administrator from Insight Lab. You have full access to my commands.
+You can type:
+- /users to manage users information (and accept or deny requests from new users)
+- /workstations to manage the workstations informations and schedules
+
+Hope I was clear and helpful.

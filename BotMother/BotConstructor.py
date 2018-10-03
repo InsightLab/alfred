@@ -27,7 +27,7 @@ class BotConstructor():
 			By default, the log of the bot will be displayed
 		"""
 		if show_log:			
-			logging.basicConfig(level=logging.DEBUG,
+			logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 		if not bot:
 			if token:
@@ -76,9 +76,9 @@ class BotConstructor():
 			for entry_point in conversation.get_entry_points():
 				handler = None
 				if entry_point[0]:
-					handler = CommandHandler(entry_point[0],entry_point[1])
+					handler = CommandHandler(entry_point[0],entry_point[1],pass_user_data=entry_point[3])
 				else:
-					handler = MessageHandler(entry_point[2],entry_point[1])
+					handler = MessageHandler(entry_point[2],entry_point[1],pass_user_data=entry_point[3])
 				entry_points.append(handler)
 
 			states = {}
@@ -89,17 +89,17 @@ class BotConstructor():
 
 				for command in states_commands[state]:
 					if command[0]:
-						states[state].append(CommandHandler(command[0],command[1]))
+						states[state].append(CommandHandler(command[0],command[1],pass_user_data=command[3]))
 					else:
-						states[state].append(MessageHandler(command[2],command[1]))
+						states[state].append(MessageHandler(command[2],command[1],pass_user_data=command[3]))
 
 			fallbacks = []
 			for fallback in conversation.get_fallbacks():
 				handler = None
 				if fallback[0]:
-					handler = CommandHandler(fallback[0],fallback[1])
+					handler = CommandHandler(fallback[0],fallback[1],pass_user_data=fallback[3])
 				else:
-					handler = MessageHandler(fallback[2],fallback[1])
+					handler = MessageHandler(fallback[2],fallback[1],pass_user_data=fallback[3])
 				fallbacks.append(handler)
 
 			self.dp.add_handler(ConversationHandler(
