@@ -53,6 +53,11 @@ manage_workstations_conversation = Conversation()
 
 #/workstations
 def start_workstations(bot,update,user_data):
+
+	if update.message.chat_id < 0:
+		update.message.reply_text("Sorry, I can not answer this command here. Try to talk with me({}) in private ;)".format(bot.name))
+		return Conversation.END
+
 	user_id = update.message.from_user.id
 	if not Helper.is_user(user_id):
 		update.message.reply_text("You are not a member of Insight Data Science Lab. Access denied")

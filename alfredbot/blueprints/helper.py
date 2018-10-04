@@ -13,14 +13,17 @@ class Helper():
 
 	@staticmethod
 	def is_adm(id):
+		Helper.reload_data()
 		return id in Helper.admins_id
 
 	@staticmethod
 	def is_user(id):
+		Helper.reload_data()
 		return id in Helper.users_id
 
 	@staticmethod
 	def notify_admins(bot,text):
+		Helper.reload_data()
 		for id in Helper.admins_id:
 			print("Sending to {}".format(id))
 			bot.sendMessage(text=text,chat_id=str(id))

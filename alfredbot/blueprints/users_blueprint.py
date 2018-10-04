@@ -35,6 +35,11 @@ request_access_conversation = Conversation()
 
 
 def start_request(bot,update,user_data):
+
+	if update.message.chat_id < 0:
+		update.message.reply_text("Sorry, I can not answer this command here. Try to talk with me({}) in private ;)".format(bot.name))
+		return Conversation.END
+
 	user = update.message.from_user
 	new_user = User({"id":user.id})
 
@@ -105,6 +110,10 @@ users_blueprint.add_conversation(request_access_conversation)
 manage_users_conversation = Conversation()
 
 def start_get_users(bot,update,user_data):
+	if update.message.chat_id < 0:
+		update.message.reply_text("Sorry, I can not answer this command here. Try to talk with me({}) in private ;)".format(bot.name))
+		return Conversation.END
+
 	user_id = update.message.from_user.id
 	if Helper.is_adm(user_id):
 		text = "Choose an user to review or /done to end this conversation. The operation can be aborted by typing /cancel ."
@@ -121,6 +130,10 @@ def start_get_users(bot,update,user_data):
 		update.message.reply_text("You are not allowed to do this operation")
 
 def start_check_requests(bot,update,user_data):
+	if update.message.chat_id < 0:
+		update.message.reply_text("Sorry, I can not answer this command here. Try to talk with me({}) in private ;)".format(bot.name))
+		return Conversation.END
+		
 	user_id = update.message.from_user.id
 	if Helper.is_adm(user_id):
 		text = "Choose an user to review or /done to end this conversation. The operation can be aborted by typing /cancel ."
