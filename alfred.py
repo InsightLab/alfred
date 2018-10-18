@@ -5,6 +5,7 @@ from alfredbot.exceptions.UserNotFoundException import UserNotFoundException
 
 from alfredbot.blueprints.users_blueprint import users_blueprint
 from alfredbot.blueprints.workstations_blueprint import workstations_blueprint
+from alfredbot.blueprints.clean_blueprint import clean_blueprint
 
 from os import environ
 
@@ -44,6 +45,7 @@ bot.add_command_handler("help",help)
 
 bot.add_blueprint(users_blueprint)
 bot.add_blueprint(workstations_blueprint)
+bot.add_blueprint(clean_blueprint)
 
 bot.start()
 
